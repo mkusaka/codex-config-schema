@@ -4,6 +4,18 @@ JSON Schema for Codex CLI `config.toml` (post‑TOML parsed JSON).
 
 Path: `schema/codex-config.schema.json`
 
+Schema URL
+- Raw: https://raw.githubusercontent.com/mkusaka/codex-config-schema/main/schema/codex-config.schema.json
+- `$id`: https://raw.githubusercontent.com/mkusaka/codex-config-schema/main/schema/codex-config.schema.json
+
+JSON `$schema` usage (for editors/tools that read JSON):
+```
+{
+  "$schema": "https://raw.githubusercontent.com/mkusaka/codex-config-schema/main/schema/codex-config.schema.json",
+  "model": "o3"
+}
+```
+
 Quick check with `jsonschema` (Python, reads TOML via `tomllib`):
 
 ```

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/mkusaka/codex-config-schema/raw/main/schema/codex-config.schema.json",
+  "$id": "https://raw.githubusercontent.com/mkusaka/codex-config-schema/main/schema/codex-config.schema.json",
   "title": "Codex CLI config.toml (JSON representation)",
   "description": "Schema for Codex CLI configuration after TOML parsing. Keys and types follow the published config reference.",
   "type": "object",
@@ -282,4 +282,3 @@
     }
   ]
 }
-
