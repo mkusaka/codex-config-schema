@@ -1,0 +1,284 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/mkusaka/codex-config-schema/main/schema/codex-config.schema.json",
+  "title": "Codex CLI config.toml (JSON representation)",
+  "description": "Schema for Codex CLI configuration after TOML parsing. Keys and types follow the published config reference.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "model": {
+      "type": "string",
+      "description": "Model to use (e.g., gpt-5, o3).",
+      "default": "gpt-5"
+    },
+    "model_provider": {
+      "type": "string",
+      "description": "Provider id from model_providers (default: openai).",
+      "default": "openai"
+    },
+    "model_context_window": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Context window tokens for the model."
+    },
+    "model_max_output_tokens": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Maximum number of output tokens."
+    },
+    "approval_policy": {
+      "type": "string",
+      "description": "When to prompt for approval.",
+      "enum": ["untrusted", "on-failure", "on-request", "never", "unless-allow-listed"]
+    },
+    "sandbox_mode": {
+      "type": "string",
+      "enum": ["read-only", "workspace-write", "danger-full-access"],
+      "description": "OS sandbox policy."
+    },
+    "sandbox_workspace_write": {
+      "$ref": "#/$defs/sandboxWorkspaceWrite"
+    },
+    "disable_response_storage": {
+      "type": "boolean",
+      "description": "Set true for ZDR orgs."
+    },
+    "notify": {
+      "type": "array",
+      "description": "External program for notifications (argv).",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "history": {
+      "$ref": "#/$defs/history"
+    },
+    "file_opener": {
+      "type": "string",
+      "enum": ["vscode", "vscode-insiders", "windsurf", "cursor", "none"],
+      "default": "vscode",
+      "description": "URI scheme for clickable citations."
+    },
+    "hide_agent_reasoning": {
+      "type": "boolean",
+      "default": false
+    },
+    "show_raw_agent_reasoning": {
+      "type": "boolean",
+      "default": false
+    },
+    "model_reasoning_effort": {
+      "type": "string",
+      "enum": ["minimal", "low", "medium", "high"]
+    },
+    "model_reasoning_summary": {
+      "type": "string",
+      "enum": ["auto", "concise", "detailed", "none"]
+    },
+    "model_verbosity": {
+      "type": "string",
+      "enum": ["low", "medium", "high"]
+    },
+    "model_supports_reasoning_summaries": {
+      "type": "boolean"
+    },
+    "project_doc_max_bytes": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "chatgpt_base_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Base URL for ChatGPT auth flow."
+    },
+    "preferred_auth_method": {
+      "type": "string",
+      "enum": ["chatgpt", "apikey"],
+      "description": "Default auth method."
+    },
+    "experimental_resume": {
+      "type": "string",
+      "description": "Path to resume JSONL."
+    },
+    "experimental_instructions_file": {
+      "type": "string",
+      "description": "Path to replace built‑in instructions (experimental)."
+    },
+    "experimental_use_exec_command_tool": {
+      "type": "boolean"
+    },
+    "responses_originator_header_internal_override": {
+      "type": "string"
+    },
+    "instructions": {
+      "type": "string",
+      "description": "Currently ignored; use experimental_instructions_file or AGENTS.md."
+    },
+    "profile": {
+      "type": "string",
+      "description": "Active profile name."
+    },
+    "profiles": {
+      "type": "object",
+      "description": "Profile‑scoped overrides.",
+      "additionalProperties": false,
+      "patternProperties": {
+        ".+": { "$ref": "#/$defs/profile" }
+      }
+    },
+    "model_providers": {
+      "type": "object",
+      "description": "Map of provider configs keyed by id.",
+      "additionalProperties": false,
+      "patternProperties": {
+        ".+": { "$ref": "#/$defs/provider" }
+      }
+    },
+    "mcp_servers": {
+      "type": "object",
+      "description": "MCP servers (spawned via stdio).",
+      "additionalProperties": false,
+      "patternProperties": {
+        ".+": { "$ref": "#/$defs/mcpServer" }
+      }
+    },
+    "shell_environment_policy": {
+      "$ref": "#/$defs/shellEnvironmentPolicy"
+    },
+    "projects": {
+      "type": "object",
+      "description": "Per‑path project trust configuration.",
+      "additionalProperties": false,
+      "patternProperties": {
+        ".+": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "trust_level": { "type": "string", "enum": ["trusted"] }
+          }
+        }
+      }
+    },
+    "tools": {
+      "$ref": "#/$defs/tools"
+    },
+    "tui": {
+      "type": "object",
+      "description": "TUI‑specific options (reserved).",
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "stringMap": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "provider": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "description": "Display name." },
+        "base_url": { "type": "string", "format": "uri" },
+        "env_key": { "type": "string", "description": "Env var for API key (non‑empty when used)." },
+        "wire_api": { "type": "string", "enum": ["chat", "responses"], "description": "Protocol used (default: chat)." },
+        "query_params": { "$ref": "#/$defs/stringMap", "description": "Extra query params for the API base URL." },
+        "http_headers": { "$ref": "#/$defs/stringMap", "description": "Additional static headers." },
+        "env_http_headers": { "$ref": "#/$defs/stringMap", "description": "Header values sourced from env vars (map header -> ENV_NAME)." },
+        "request_max_retries": { "type": "integer", "minimum": 0, "description": "Per‑provider HTTP retry count (default: 4)." },
+        "stream_max_retries": { "type": "integer", "minimum": 0, "description": "SSE stream retry count (default: 10)." },
+        "stream_idle_timeout_ms": { "type": "integer", "minimum": 0, "description": "SSE idle timeout in ms (default: 300000)." }
+      }
+    },
+    "mcpServer": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "command": { "type": "string" },
+        "args": { "type": "array", "items": { "type": "string" }, "default": [] },
+        "env": { "$ref": "#/$defs/stringMap", "default": {} }
+      },
+      "required": ["command"]
+    },
+    "shellEnvironmentPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "inherit": { "type": "string", "enum": ["all", "core", "none"], "default": "all" },
+        "ignore_default_excludes": { "type": "boolean", "default": false },
+        "exclude": { "type": "array", "items": { "type": "string" }, "default": [] },
+        "set": { "$ref": "#/$defs/stringMap", "default": {} },
+        "include_only": { "type": "array", "items": { "type": "string" }, "default": [] }
+      }
+    },
+    "history": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "persistence": { "type": "string", "enum": ["save-all", "none"], "default": "save-all" },
+        "max_bytes": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "sandboxWorkspaceWrite": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "exclude_tmpdir_env_var": { "type": "boolean", "default": false },
+        "exclude_slash_tmp": { "type": "boolean", "default": false },
+        "writable_roots": { "type": "array", "items": { "type": "string" } },
+        "network_access": { "type": "boolean", "default": false }
+      }
+    },
+    "tools": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "web_search": { "type": "boolean", "default": false },
+        "web_search_request": { "type": "boolean", "default": false }
+      }
+    },
+    "profile": {
+      "type": "object",
+      "description": "Subset of top‑level config keys allowed per profile.",
+      "additionalProperties": false,
+      "properties": {
+        "model": { "type": "string" },
+        "model_provider": { "type": "string" },
+        "approval_policy": { "type": "string", "enum": ["untrusted", "on-failure", "on-request", "never", "unless-allow-listed"] },
+        "disable_response_storage": { "type": "boolean" },
+        "model_reasoning_effort": { "type": "string", "enum": ["minimal", "low", "medium", "high"] },
+        "model_reasoning_summary": { "type": "string", "enum": ["auto", "concise", "detailed", "none"] },
+        "model_verbosity": { "type": "string", "enum": ["low", "medium", "high"] },
+        "model_context_window": { "type": "integer", "minimum": 1 },
+        "model_max_output_tokens": { "type": "integer", "minimum": 1 }
+      }
+    }
+  },
+  "examples": [
+    {
+      "model": "o3",
+      "approval_policy": "never",
+      "model_provider": "openai",
+      "model_providers": {
+        "openai": {
+          "name": "OpenAI",
+          "base_url": "https://api.openai.com/v1",
+          "env_key": "OPENAI_API_KEY"
+        }
+      },
+      "profiles": {
+        "o3": {
+          "model": "o3",
+          "approval_policy": "never",
+          "model_reasoning_effort": "high",
+          "model_reasoning_summary": "detailed"
+        }
+      },
+      "shell_environment_policy": {
+        "inherit": "all",
+        "exclude": ["AWS_*", "AZURE_*"],
+        "set": { "CI": "1" }
+      },
+      "history": { "persistence": "save-all" },
+      "tools": { "web_search": false }
+    }
+  ]
+}

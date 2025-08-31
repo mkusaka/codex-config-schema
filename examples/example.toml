@@ -1,0 +1,36 @@
+model = "o3"
+model_provider = "openai"
+approval_policy = "never"
+
+[model_providers.openai]
+name = "OpenAI"
+base_url = "https://api.openai.com/v1"
+env_key = "OPENAI_API_KEY"
+
+[profiles.o3]
+model = "o3"
+approval_policy = "never"
+model_reasoning_effort = "high"
+model_reasoning_summary = "detailed"
+
+[profiles.zdr]
+model = "o3"
+model_provider = "openai"
+approval_policy = "on-failure"
+disable_response_storage = true
+
+[shell_environment_policy]
+inherit = "core"
+exclude = ["AWS_*", "AZURE_*"]
+set = { CI = "1" }
+include_only = ["PATH", "HOME", "USER"]
+
+[history]
+persistence = "save-all"
+
+[tools]
+web_search = false
+
+[projects."/Users/YOU/work/myrepo"]
+trust_level = "trusted"
+
